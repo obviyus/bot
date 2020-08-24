@@ -6,6 +6,7 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Defaults, Fil
 import api
 import chat_management
 from configuration import config
+from textgenrnn import textgenrnn
 
 import datetime
 
@@ -60,6 +61,7 @@ commands = {
     "ud": api.ud,
     "weather": api.weather,
     "wink": api.wink,
+    "text": api.textgen,
 }
 
 
@@ -88,11 +90,16 @@ def main():
         api.stats_check
     ))
 
+    generator = textgenrnn(weights_path='textgen/ssgg_weights.hdf5',
+                           vocab_path='textgen/ssgg_vocab.json',
+                           config_path='textgen/ssgg_config.json')
+    dispatcher.bot_data["textgen"] = generator
+
     j.run_daily(
         api.clear, time=datetime.time(18, 30)
     )
 
-    dispatcher.bot.set_my_commands([(cmd, func.__doc__) for cmd, func in commands.items()])
+    # dispatcher.bot.set_my_commands([(cmd, func.__doc__) for cmd, func in commands.items()])
 
     updater.start_polling(clean=True)
     print("Started bot")
